@@ -11,9 +11,11 @@ Some of its features and characteristics:
 * Easy to change on the fly - all the functionality is implemented in JSPs, so no IDE required
 * Cross platform
 * Open source
-* No separate db to install and configure - it uses an 'in memory' db that is automatically (re)initialized on start up
+* No separate db to install and configure - it now uses an embedded SQLite db that is automatically reinitialized on start up
 
 All you need to do is download and open the zip file, and then extract the war file into the webapps directory of your favorite servlet engine.
+
+By default the app stores its SQLite file in your JVM temp directory as `bodgeit.sqlite`. You can override the path with `-Dbodgeit.db.path=/path/to/bodgeit.sqlite`, or keep the data between restarts with `-Dbodgeit.db.reset=false`.
 
 Then point your browser at (for example) http://localhost:8080/bodgeit
 

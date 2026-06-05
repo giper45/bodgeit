@@ -1,7 +1,8 @@
 <%@ page import="java.math.*" %>
-<%@ page import="java.servlet.*" %>
-<%@ page import="java.servlet.http.*" %>
+<%@ page import="javax.servlet.*" %>
+<%@ page import="javax.servlet.http.*" %>
 <%@ page import="java.sql.*" %>
+<%@ page import="com.thebodgeitstore.util.Database" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <html>
 <head>
@@ -83,10 +84,7 @@
 	PreparedStatement stmt = null;
 	ResultSet rs = null;
 	try {
-		// Get hold of the JDBC driver
-		Class.forName("org.hsqldb.jdbcDriver" );
-		// Establish a connection to an in memory db
-		c = DriverManager.getConnection("jdbc:hsqldb:mem:SQL", "sa", "");
+		c = Database.getConnection();
 		stmt = c.prepareStatement("SELECT * FROM ProductTypes ORDER BY type");
 		rs = stmt.executeQuery();
 		while (rs.next()) {
@@ -101,9 +99,15 @@
 			out.println("System error.");
 		}
 	} finally {
-		stmt.close();
-		rs.close();
-		c.close();
+		if (stmt != null) {
+			stmt.close();
+		}
+		if (rs != null) {
+			rs.close();
+		}
+		if (c != null) {
+			c.close();
+		}
 	}
 %>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
