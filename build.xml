@@ -27,7 +27,7 @@
 		<delete dir="build/WEB-INF/classes"/>
 		<mkdir dir="build/WEB-INF/classes"/>
 		<!-- Compile the java code -->
-		<javac source="1.5" target="1.5" includeantruntime="false" destdir="build/WEB-INF/classes" srcdir="src" classpathref="java.classpath" />
+		<javac source="1.8" target="1.8" includeantruntime="false" destdir="build/WEB-INF/classes" srcdir="src" classpathref="java.classpath" />
 	</target>
 
 	<target name="build" depends="compile">

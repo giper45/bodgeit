@@ -23,6 +23,12 @@ Portable Tomcat setup on Linux:
 * Browse to the URL printed by the setup script
 * Stop it with `./scripts/linux/stop-portable-tomcat.sh`
 
+Portable Tomcat setup on macOS:
+* Run `./scripts/darwin/setup-portable-tomcat.sh`
+* Start it with `./scripts/darwin/start-portable-tomcat.sh`
+* Browse to the URL printed by the setup script
+* Stop it with `./scripts/darwin/stop-portable-tomcat.sh`
+
 Portable Tomcat setup on Windows:
 * Run `powershell -ExecutionPolicy Bypass -File .\scripts\windows\setup-portable-tomcat.ps1`
 * Start it with `powershell -ExecutionPolicy Bypass -File .\scripts\windows\start-portable-tomcat.ps1`
@@ -33,7 +39,19 @@ The setup scripts always download a portable Eclipse Temurin JDK and Apache Tomc
 
 Minimal host dependencies:
 * Linux: `bash`, `curl`, `tar`, `sed`, `lsof`, and either `shasum` or `sha256sum` plus `sha512sum`
-* Windows: PowerShell with `Invoke-WebRequest`, `Expand-Archive`, and `Get-FileHash`
+* macOS: `bash`, `curl`, `tar`, `sed`, `lsof`, and `shasum`
+* Windows: PowerShell with `Invoke-WebRequest`, `Expand-Archive`, `Compress-Archive`, and `Get-FileHash`
+
+Makefile shortcuts:
+* `make setup`
+* `make start`
+* `make stop`
+* `make bundle`
+
+Bundle output:
+* Linux and macOS: `dist/bodgeit-portable-{linux|darwin}.tar.gz`
+* Windows: `dist/bodgeit-portable-windows.zip`
+* Each bundle contains only a ready-to-run portable runtime plus top-level `start.sh` / `stop.sh` on Unix or `start.bat` / `stop.bat` on Windows.
 
 You may find it easier to find vulnerabilities using a pen test tool.
 

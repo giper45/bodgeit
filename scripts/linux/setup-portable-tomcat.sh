@@ -4,11 +4,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+PORTABLE_UNIX_PLATFORM="${PORTABLE_UNIX_PLATFORM:-}"
 
 TOMCAT_VERSION="${TOMCAT_VERSION:-9.0.118}"
 TOMCAT_SERIES="${TOMCAT_SERIES:-9}"
 ANT_VERSION="${ANT_VERSION:-1.10.17}"
-JAVA_VERSION="${JAVA_VERSION:-8}"
+JAVA_VERSION="${JAVA_VERSION:-}"
 TOMCAT_HTTP_PORT="${TOMCAT_HTTP_PORT:-18080}"
 TOMCAT_SHUTDOWN_PORT="${TOMCAT_SHUTDOWN_PORT:-18005}"
 TOMCAT_AJP_PORT="${TOMCAT_AJP_PORT:-18009}"
@@ -92,13 +93,28 @@ detect_platform() {
 	local os_name
 	local arch_name
 
-	os_name="$(uname -s)"
+	if [ -n "${PORTABLE_UNIX_PLATFORM}" ]; then
+		os_name="${PORTABLE_UNIX_PLATFORM}"
+	else
+		os_name="$(uname -s)"
+	fi
 	arch_name="$(uname -m)"
 
 	case "${os_name}" in
-		Linux) ADOPTIUM_OS="linux" ;;
+		Linux|linux)
+			ADOPTIUM_OS="linux"
+			if [ -z "${JAVA_VERSION}" ]; then
+				JAVA_VERSION="8"
+			fi
+			;;
+		Darwin|darwin|macos|mac)
+			ADOPTIUM_OS="mac"
+			if [ -z "${JAVA_VERSION}" ]; then
+				JAVA_VERSION="17"
+			fi
+			;;
 		*)
-			echo "This script supports Linux only. Use the Windows script on Windows." >&2
+			echo "This script supports Linux and macOS. Use the Windows script on Windows." >&2
 			exit 1
 			;;
 	esac
@@ -107,7 +123,7 @@ detect_platform() {
 		x86_64|amd64) ADOPTIUM_ARCH="x64" ;;
 		aarch64|arm64) ADOPTIUM_ARCH="aarch64" ;;
 		*)
-			echo "Unsupported Linux architecture for this script: ${arch_name}" >&2
+			echo "Unsupported architecture for this script: ${arch_name}" >&2
 			exit 1
 			;;
 	esac

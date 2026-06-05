@@ -7,3 +7,4 @@
 !/build/WEB-INF/lib/servlet-api.jar
 !/build/WEB-INF/web.xml
 /.portable-tomcat/
+/dist/
