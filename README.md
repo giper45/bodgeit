@@ -17,7 +17,7 @@ All you need to do is download and open the zip file, and then extract the war f
 
 Then point your browser at (for example) http://localhost:8080/bodgeit
 
-Portable Tomcat setup on Linux/macOS:
+Portable Tomcat setup on Linux:
 * Run `./scripts/linux/setup-portable-tomcat.sh`
 * Start it with `./scripts/linux/start-portable-tomcat.sh`
 * Browse to the URL printed by the setup script
@@ -29,7 +29,7 @@ Portable Tomcat setup on Windows:
 * Browse to the URL printed by the setup script
 * Stop it with `powershell -ExecutionPolicy Bypass -File .\scripts\windows\stop-portable-tomcat.ps1`
 
-The setup scripts download Apache Tomcat 9 into `.portable-tomcat/`, build `build/bodgeit.war`, and copy the app into Tomcat's `webapps/` directory. They keep the original embedded in-memory HSQLDB behavior, so the application resets on each Tomcat restart.
+The setup scripts always download a portable Eclipse Temurin JDK and Apache Tomcat into `.portable-tomcat/`. If `build/bodgeit.war` already exists, they deploy it directly. If no WAR exists but the exploded `build/` webapp exists, they deploy that directly instead. Portable Apache Ant is only downloaded as a fallback when nothing deployable is present in `build/` and a local build has to be performed. The app keeps the original embedded in-memory HSQLDB behavior, so it resets on each Tomcat restart.
 
 You may find it easier to find vulnerabilities using a pen test tool.
 
