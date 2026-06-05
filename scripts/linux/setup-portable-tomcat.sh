@@ -50,6 +50,13 @@ require_cmd() {
 	fi
 }
 
+extract_json_value() {
+	local key="$1"
+	local file_path="$2"
+
+	sed -n "s/.*\"${key}\":[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p" "${file_path}" | head -n 1
+}
+
 port_in_use() {
 	lsof -nP -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1
 }
@@ -90,27 +97,17 @@ detect_platform() {
 
 	case "${os_name}" in
 		Linux) ADOPTIUM_OS="linux" ;;
-		Darwin) ADOPTIUM_OS="mac" ;;
 		*)
-			echo "Unsupported OS for this script: ${os_name}" >&2
+			echo "This script supports Linux only. Use the Windows script on Windows." >&2
 			exit 1
 			;;
 	esac
 
 	case "${arch_name}" in
 		x86_64|amd64) ADOPTIUM_ARCH="x64" ;;
-		aarch64)
-			ADOPTIUM_ARCH="aarch64"
-			;;
-		arm64)
-			if [ "${ADOPTIUM_OS}" = "mac" ]; then
-				echo "Portable Temurin JDK 8 is not published for macOS aarch64. Use a Linux or Windows host for the portable JDK flow." >&2
-				exit 1
-			fi
-			ADOPTIUM_ARCH="aarch64"
-			;;
+		aarch64|arm64) ADOPTIUM_ARCH="aarch64" ;;
 		*)
-			echo "Unsupported architecture for this script: ${arch_name}" >&2
+			echo "Unsupported Linux architecture for this script: ${arch_name}" >&2
 			exit 1
 			;;
 	esac
@@ -122,26 +119,14 @@ load_java_metadata() {
 	metadata_url="https://api.adoptium.net/v3/assets/latest/${JAVA_VERSION}/hotspot?architecture=${ADOPTIUM_ARCH}&heap_size=normal&image_type=jdk&os=${ADOPTIUM_OS}&vendor=eclipse"
 	curl -fsSL "${metadata_url}" -o "${JAVA_METADATA_PATH}"
 
-	JAVA_RELEASE_NAME="$(perl -MJSON::PP -e '
-		local $/;
-		my $items = decode_json(<STDIN>);
-		die "No JDK asset returned\n" unless ref($items) eq "ARRAY" && @$items;
-		print $items->[0]{release_name};
-	' < "${JAVA_METADATA_PATH}")"
+	JAVA_RELEASE_NAME="$(extract_json_value "release_name" "${JAVA_METADATA_PATH}")"
+	JAVA_PACKAGE_LINK="$(extract_json_value "link" "${JAVA_METADATA_PATH}")"
+	JAVA_PACKAGE_CHECKSUM="$(extract_json_value "checksum" "${JAVA_METADATA_PATH}")"
 
-	JAVA_PACKAGE_LINK="$(perl -MJSON::PP -e '
-		local $/;
-		my $items = decode_json(<STDIN>);
-		die "No JDK asset returned\n" unless ref($items) eq "ARRAY" && @$items;
-		print $items->[0]{binary}{package}{link};
-	' < "${JAVA_METADATA_PATH}")"
-
-	JAVA_PACKAGE_CHECKSUM="$(perl -MJSON::PP -e '
-		local $/;
-		my $items = decode_json(<STDIN>);
-		die "No JDK asset returned\n" unless ref($items) eq "ARRAY" && @$items;
-		print $items->[0]{binary}{package}{checksum};
-	' < "${JAVA_METADATA_PATH}")"
+	if [ -z "${JAVA_RELEASE_NAME}" ] || [ -z "${JAVA_PACKAGE_LINK}" ] || [ -z "${JAVA_PACKAGE_CHECKSUM}" ]; then
+		echo "Failed to parse Adoptium metadata from ${JAVA_METADATA_PATH}." >&2
+		exit 1
+	fi
 
 	JAVA_ARCHIVE_NAME="$(basename "${JAVA_PACKAGE_LINK}")"
 	JAVA_ARCHIVE_PATH="${DOWNLOAD_DIR}/${JAVA_ARCHIVE_NAME}"
@@ -287,16 +272,21 @@ install_bodgeit_payload() {
 
 configure_ports() {
 	local server_xml="$1"
+	local tmp_file
 
-	perl -0pi -e "s/<Server port=\"\\d+\" shutdown=\"SHUTDOWN\">/<Server port=\"${TOMCAT_SHUTDOWN_PORT}\" shutdown=\"SHUTDOWN\">/" "${server_xml}"
-	perl -0pi -e "s/Connector port=\"\\d+\" protocol=\"HTTP\\/1\\.1\"/Connector port=\"${TOMCAT_HTTP_PORT}\" protocol=\"HTTP\\/1.1\"/" "${server_xml}"
-	perl -0pi -e "s/Connector port=\"\\d+\" protocol=\"AJP\\/1\\.3\" redirectPort=\"8443\"/Connector port=\"${TOMCAT_AJP_PORT}\" protocol=\"AJP\\/1.3\" redirectPort=\"8443\"/" "${server_xml}"
+	tmp_file="${server_xml}.tmp"
+	sed \
+		-e "s/<Server port=\"[0-9][0-9]*\" shutdown=\"SHUTDOWN\">/<Server port=\"${TOMCAT_SHUTDOWN_PORT}\" shutdown=\"SHUTDOWN\">/" \
+		-e "s/Connector port=\"[0-9][0-9]*\" protocol=\"HTTP\\/1\\.1\"/Connector port=\"${TOMCAT_HTTP_PORT}\" protocol=\"HTTP\\/1.1\"/" \
+		-e "s/Connector port=\"[0-9][0-9]*\" protocol=\"AJP\\/1\\.3\" redirectPort=\"8443\"/Connector port=\"${TOMCAT_AJP_PORT}\" protocol=\"AJP\\/1.3\" redirectPort=\"8443\"/" \
+		"${server_xml}" > "${tmp_file}"
+	mv "${tmp_file}" "${server_xml}"
 }
 
 require_cmd curl
 require_cmd tar
-require_cmd perl
 require_cmd lsof
+require_cmd sed
 
 detect_platform
 

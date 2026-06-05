@@ -31,6 +31,10 @@ Portable Tomcat setup on Windows:
 
 The setup scripts always download a portable Eclipse Temurin JDK and Apache Tomcat into `.portable-tomcat/`. If `build/bodgeit.war` already exists, they deploy it directly. If no WAR exists but the exploded `build/` webapp exists, they deploy that directly instead. Portable Apache Ant is only downloaded as a fallback when nothing deployable is present in `build/` and a local build has to be performed. The app keeps the original embedded in-memory HSQLDB behavior, so it resets on each Tomcat restart.
 
+Minimal host dependencies:
+* Linux: `bash`, `curl`, `tar`, `sed`, `lsof`, and either `shasum` or `sha256sum` plus `sha512sum`
+* Windows: PowerShell with `Invoke-WebRequest`, `Expand-Archive`, and `Get-FileHash`
+
 You may find it easier to find vulnerabilities using a pen test tool.
 
 If you dont have a favourite one, I'd recommend the [Zed Attack Proxy](https://www.owasp.org/index.php/ZAP) (for which I'm the project lead).
