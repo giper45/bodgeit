@@ -169,20 +169,12 @@ extract_tarball_to_dir() {
 	local archive_path="$1"
 	local target_dir="$2"
 	local parent_dir
-	local root_entry
-	local extracted_root
 
 	parent_dir="$(dirname "${target_dir}")"
 	mkdir -p "${parent_dir}"
 	rm -rf "${target_dir}"
-
-	root_entry="$(tar -tzf "${archive_path}" | head -1 | cut -d/ -f1)"
-	tar -xzf "${archive_path}" -C "${parent_dir}"
-	extracted_root="${parent_dir}/${root_entry}"
-
-	if [ "${extracted_root}" != "${target_dir}" ]; then
-		mv "${extracted_root}" "${target_dir}"
-	fi
+	mkdir -p "${target_dir}"
+	tar -xzf "${archive_path}" -C "${target_dir}" --strip-components=1
 }
 
 install_portable_java() {
