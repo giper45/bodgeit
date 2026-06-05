@@ -1,0 +1,9 @@
+/build/*
+!/build/WEB-INF/
+/build/WEB-INF/*
+!/build/WEB-INF/lib/
+/build/WEB-INF/lib/*
+!/build/WEB-INF/lib/hsqldb.jar
+!/build/WEB-INF/lib/servlet-api.jar
+!/build/WEB-INF/web.xml
+/.portable-tomcat/

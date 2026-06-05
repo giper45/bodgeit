@@ -24,17 +24,27 @@
 
 	<!-- Compile all of the source code -->
 	<target name="compile">
+		<delete dir="build/WEB-INF/classes"/>
+		<mkdir dir="build/WEB-INF/classes"/>
 		<!-- Compile the java code -->
-		<javac target="1.5" destdir="build/WEB-INF/classes" srcdir="src" classpathref="java.classpath" />
+		<javac source="1.5" target="1.5" includeantruntime="false" destdir="build/WEB-INF/classes" srcdir="src" classpathref="java.classpath" />
 	</target>
 
 	<target name="build" depends="compile">
+		<delete>
+			<fileset dir="build">
+				<exclude name="WEB-INF/classes/**"/>
+				<exclude name="WEB-INF/lib/hsqldb.jar"/>
+				<exclude name="WEB-INF/lib/servlet-api.jar"/>
+				<exclude name="WEB-INF/web.xml"/>
+			</fileset>
+		</delete>
 		<copy toDir="build"><fileset dir="root" includes="**/*"/></copy>
 
 		<delete file="build/bodgeit.war"/>
 		
 		<war destfile="build/bodgeit.war" webxml="root/WEB-INF/web.xml">
-			<fileset dir="build"/>
+			<fileset dir="build" excludes="WEB-INF/web.xml"/>
 		</war>
 	</target>
 
