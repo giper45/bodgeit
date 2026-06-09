@@ -6,6 +6,8 @@
 FROM tomcat:9.0
 MAINTAINER Simon Bennetts "psiinon@gmail.com"
 
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 RUN curl -s -L https://github.com/psiinon/bodgeit/releases/download/1.4.0/bodgeit.war > bodgeit.war && \
 	mv bodgeit.war /usr/local/tomcat/webapps
 
