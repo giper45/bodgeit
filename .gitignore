@@ -1,0 +1,34 @@
+# Ant / Java build output
+(build/
+/bin/
+/dist/
+*.class
+*.war
+*.ear
+
+# Local runtime and test artifacts
+/.portable-tomcat/
+*.log
+*.sqlite
+*.sqlite-journal
+hs_err_pid*
+replay_pid*
+
+# Local environment overrides
+/local.properties
+/bodgeit-*.session
+/bodgeit-*.properties
+
+# IDE / editor files
+/.idea/
+/.vscode/
+.classpath
+.project
+.settings/
+*.iml
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
